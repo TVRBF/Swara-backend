@@ -1,21 +1,20 @@
 import os
 from dotenv import load_dotenv
 
-# Load .env only if running locally
+# Load environment variables from .env only if not in production
 if os.environ.get("FLASK_ENV") != "production":
-    load_dotenv()  # This allows you to use .env locally
+    load_dotenv()
 
 class Config:
-    # Read environment variables
-    SECRET_KEY = os.environ.get("SECRET_KEY")
+    # Mandatory environment variables
+    SECRET_KEY = os.environ.get("JWT_Secret")
     MONGO_URI = os.environ.get("MONGO_URI")
 
-    # Optional: add debug flag
+    # Optional debug flag
     DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 
-    # Ensure mandatory variables are set
+    # Ensure required variables are set
     if not SECRET_KEY:
-        raise Exception("SECRET_KEY is not set in environment variables!")
+        raise Exception("SECRET_KEY (JWT_Secret) is not set in environment variables!")
     if not MONGO_URI:
         raise Exception("MONGO_URI is not set in environment variables!")
-
