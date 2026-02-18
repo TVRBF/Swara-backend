@@ -16,7 +16,9 @@ auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
 def student_signup():
     try:
         data = request.get_json()
-        if not data or "email" not in data or "password" not in data or "name" not in data:
+        if not data:
+            return jsonify({"message": "Missing request body"}), 400
+        if "name" not in data or "email" not in data or "password" not in data:
             return jsonify({"message": "Missing required fields"}), 400
 
         if find_student_by_email(data["email"]):
@@ -28,6 +30,7 @@ def student_signup():
         return jsonify({"message": "Student created", "token": token}), 201
 
     except Exception as e:
+        print("Student Signup Exception:", str(e))
         return jsonify({"message": "Student signup failed", "error": str(e)}), 500
 
 # ---------------------------
@@ -37,7 +40,9 @@ def student_signup():
 def admin_signup():
     try:
         data = request.get_json()
-        if not data or "email" not in data or "password" not in data or "name" not in data:
+        if not data:
+            return jsonify({"message": "Missing request body"}), 400
+        if "name" not in data or "email" not in data or "password" not in data:
             return jsonify({"message": "Missing required fields"}), 400
 
         if find_admin_by_email(data["email"]):
@@ -49,6 +54,7 @@ def admin_signup():
         return jsonify({"message": "Admin created", "token": token}), 201
 
     except Exception as e:
+        print("Admin Signup Exception:", str(e))
         return jsonify({"message": "Admin signup failed", "error": str(e)}), 500
 
 # ---------------------------
@@ -58,31 +64,40 @@ def admin_signup():
 def login():
     try:
         data = request.get_json()
-        if not data or "email" not in data or "password" not in data:
+        if not data:
+            return jsonify({"message": "Missing request body"}), 400
+        if "email" not in data or "password" not in data:
             return jsonify({"message": "Missing required fields"}), 400
 
+        email = data["email"]
+        password = data["password"]
+
         # Try student first, then admin
-        user = find_student_by_email_with_password(data["email"]) or find_admin_by_email(data["email"])
+        user = find_student_by_email_with_password(email)
+        user_type = "student"
+        if not user:
+            user = find_admin_by_email(email)
+            user_type = "admin"
+
         if not user:
             return jsonify({"message": "User not found"}), 404
 
-        # Ensure password exists
         if "password" not in user:
             return jsonify({"message": "User has no password set"}), 500
 
-        # Verify password
-        if not verify_password(data["password"], user["password"]):
+        if not verify_password(password, user["password"]):
             return jsonify({"message": "Incorrect password"}), 401
 
-        # Ensure role exists
-        role = user.get("role")
+        role = user.get("role", user_type)  # fallback to type
         if not role:
             return jsonify({"message": "User role not found"}), 500
 
         token = generate_token(str(user["_id"]), role)
+
         return jsonify({"message": f"{role.capitalize()} logged in", "token": token}), 200
 
     except Exception as e:
+        print("Login Exception:", str(e))
         return jsonify({"message": "Login failed", "error": str(e)}), 500
 
 # ---------------------------
@@ -94,6 +109,7 @@ def list_students():
         students = get_all_students()
         return jsonify(students), 200
     except Exception as e:
+        print("List Students Exception:", str(e))
         return jsonify({"message": "Failed to fetch students", "error": str(e)}), 500
 
 # ---------------------------
@@ -122,4 +138,5 @@ def admin_dashboard():
         }), 200
 
     except Exception as e:
+        print("Dashboard Exception:", str(e))
         return jsonify({"message": "Failed to fetch dashboard data", "error": str(e)}), 500
