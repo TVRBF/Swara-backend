@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
@@ -11,7 +12,7 @@ from routes.reminder_routes import reminder_bp   # ✅ ADD THIS
 app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY
 
-# Enable CORS
+# Enable CORS for all routes
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Register blueprints
@@ -27,4 +28,8 @@ def home():
     return "Smart Student Onboarding API is running!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Get port from environment variable (Render sets this automatically)
+    port = int(os.environ.get("PORT", 5000))
+    
+    # Bind to 0.0.0.0 so Render can access the server externally
+    app.run(host="0.0.0.0", port=port)
