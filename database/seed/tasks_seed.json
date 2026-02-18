@@ -1,0 +1,23 @@
+[
+    {
+        "title": "Submit Documents",
+        "description": "Upload all required academic documents",
+        "deadline": "2026-03-01",
+        "assigned_to": "student1@example.com",
+        "completed": false
+    },
+    {
+        "title": "Complete Orientation",
+        "description": "Attend the online orientation session",
+        "deadline": "2026-03-05",
+        "assigned_to": "student1@example.com",
+        "completed": true
+    },
+    {
+        "title": "Course Registration",
+        "description": "Register for your first semester courses",
+        "deadline": "2026-03-10",
+        "assigned_to": "student1@example.com",
+        "completed": false
+    }
+]
